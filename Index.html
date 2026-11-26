@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajarani Coupon Result & Admin System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #f36d8d; /* Pink background */
+            padding: 15px 10px;
+            color: #000;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Top Header & Reports Box */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        .reports-box {
+            width: 155px;
+            background-color: #e6f0ff;
+            border: 1px solid #b8cce4;
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+
+        .reports-title {
+            color: #1f4e78;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .reports-box a {
+            display: block;
+            color: #0000ee;
+            text-decoration: underline;
+            margin-bottom: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .reports-box a:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Admin Control Panel Box (Hidden by default) */
+        .admin-panel {
+            display: none;
+            background-color: #1e272e;
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 2px solid #ffd32a;
+            font-size: 12px;
+        }
+
+        .admin-panel h3 {
+            color: #ffd32a;
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .admin-panel select, .admin-panel input {
+            padding: 5px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            font-weight: bold;
+        }
+
+        .admin-panel input[type="text"] {
+            width: 70px;
+            text-align: center;
+        }
+
+        .btn-admin {
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-save { background-color: #0be881; color: #000; }
+        .btn-auto { background-color: #00d8d6; color: #000; }
+        .btn-clear { background-color: #ff5e57; color: #fff; }
+        .btn-close { background-color: #808e9b; color: #fff; padding: 3px 8px; }
+
+        /* Date Filter Section */
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .date-input {
+            padding: 3px 6px;
+            font-size: 12px;
+            border: 1px solid #767676;
+            background-color: #fff;
+            width: 115px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .show-btn {
+            padding: 3px 12px;
+            font-size: 12px;
+            background-color: #efefef;
+            border: 1px solid #767676;
+            border-radius: 2px;
+            cursor: pointer;
+            color: #000;
+        }
+
+        /* Result Table Styling */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 5px 4px;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background-color: #fdfd96;
+            color: #000;
+            padding: 7px 4px;
+            font-size: 10.5px;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #d4d68c;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fdfd96;
+        }
+
+        .col-time { width: 16%; }
+        .col-coupon { width: 16%; }
+        .col-result { width: 10%; font-size: 11px; color: #b30000; }
+        .col-name { width: 36%; }
+        .col-cresult { width: 22%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Top Left Reports Menu -->
+    <div class="top-bar">
+        <div class="reports-box">
+            <div class="reports-title">Reports</div>
+            <a onclick="menuClick('Result')">Result</a>
+            <a onclick="menuClick('Coupon Details')">Coupon Details</a>
+            <a onclick="menuClick('Ledger Details')">Ledger Details</a>
+            <a onclick="openAdminPanel()">Change Pin (Admin)</a>
+            <a onclick="menuClick('Exit')">Exit</a>
+        </div>
+    </div>
+
+    <!-- OWNER ADMIN PANEL (PIN: 1234) -->
+    <div id="adminPanel" class="admin-panel">
+        <h3>
+            <span>👑 Owner Control Panel</span>
+            <button class="btn-admin btn-close" onclick="closeAdminPanel()">X Close</button>
+        </h3>
+        
+        <!-- Manual Number Override -->
+        <div class="admin-row">
+            <label>Time:</label>
+            <select id="adminTimeSelect"></select>
+            
+            <label>Number (00-99):</label>
+            <input type="text" id="adminNumberInput" maxlength="2" placeholder="00-99">
+            
+            <button class="btn-admin btn-save" onclick="setManualNumber()">Set Result</button>
+        </div>
+
+        <!-- Auto Random & Clear Controls -->
+        <div class="admin-row">
+            <button class="btn-admin btn-auto" onclick="generateAllRandom()">🎲 Auto Random All</button>
+            <button class="btn-admin btn-auto" onclick="generateNextSlot()">⚡ Next Empty Slot</button>
+            <button class="btn-admin btn-clear" onclick="clearAllResults()">🗑️ Clear All</button>
+        </div>
+    </div>
+
+    <!-- Date & Show Button -->
+    <div class="filter-section">
+        <label for="dateInput">Date</label>
+        <input type="date" id="dateInput" class="date-input" value="2026-11-25">
+        <button class="show-btn" onclick="filterResults()">Show</button>
+    </div>
+
+    <!-- Result Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-time">Draw Time</th>
+                    <th class="col-coupon">Coupon</th>
+                    <th class="col-result">Result</th>
+                    <th class="col-name">Coupon Name</th>
+                    <th class="col-cresult">Coupon Result</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Default Data Structure
+    const defaultData = [
+        { time: "8:30AM", coupon: "RAJARANI", result: "94", name: "RAJARANI PAHLA DAW", cResult: "" },
+        { time: "9:00AM", coupon: "RAJARANI", result: "16", name: "RAJARANI SUBAH", cResult: "" },
+        { time: "9:30AM", coupon: "RAJARANI", result: "54", name: "RAJARANI KIRAN", cResult: "" },
+        { time: "10:00AM", coupon: "RAJARANI", result: "28", name: "RAJARANI HINDUSTANI", cResult: "" },
+        { time: "10:30AM", coupon: "RAJARANI", result: "96", name: "RAJARANI PRABHAT", cResult: "" },
+        { time: "11:00AM", coupon: "RAJARANI", result: "05", name: "RAJARANI LAJAWAB", cResult: "" },
+        { time: "11:30AM", coupon: "RAJARANI", result: "38", name: "RAJARANI SAMRAT", cResult: "" },
+        { time: "12:00PM", coupon: "RAJARANI", result: "74", name: "RAJARANI DELUXE", cResult: "" },
+        { time: "12:30PM", coupon: "RAJARANI", result: "09", name: "RAJARANI NOON", cResult: "" },
+        { time: "1:00PM", coupon: "RAJARANI", result: "75", name: "RAJARANI KING", cResult: "" },
+        { time: "1:30PM", coupon: "RAJARANI", result: "61", name: "RAJARANI ROYAL", cResult: "" },
+        { time: "2:00PM", coupon: "RAJARANI", result: "70", name: "RAJARANI MILLENIUM", cResult: "" },
+        { time: "2:30PM", coupon: "RAJARANI", result: "57", name: "RAJARANI HUNDRED", cResult: "" },
+        { time: "3:00PM", coupon: "RAJARANI", result: "01", name: "RAJARANI DAIMOND", cResult: "" },
+        { time: "3:30PM", coupon: "RAJARANI", result: "31", name: "RAJARANI SONA", cResult: "" },
+        { time: "4:00PM", coupon: "RAJARANI", result: "51", name: "RAJARANI EXPRESS", cResult: "" },
+        { time: "4:30PM", coupon: "RAJARANI", result: "68", name: "RAJARANI SPEASAL", cResult: "" },
+        { time: "5:00PM", coupon: "RAJARANI", result: "06", name: "RAJARANI SANDHIA", cResult: "" },
+        { time: "5:30PM", coupon: "RAJARANI", result: "42", name: "RAJARANI CHANDNI", cResult: "" },
+        { time: "6:00PM", coupon: "RAJARANI", result: "32", name: "RAJARANI SHAM", cResult: "" }
+    ];
+
+    // LocalStorage se saved data load karein ya default use karein
+    let drawData = JSON.parse(localStorage.getItem("rajaraniResults")) || defaultData;
+    const ADMIN_PIN = "1234"; // Aap yahan se apna PIN badal sakte hain
+
+    // Table render function
+    function renderTable() {
+        const tbody = document.getElementById("resultTableBody");
+        tbody.innerHTML = "";
+
+        drawData.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.time}</td>
+                <td>${row.coupon}</td>
+                <td class="col-result">${row.result}</td>
+                <td>${row.name}</td>
+                <td>${row.cResult}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Admin Dropdown mein sabhi time slots bharna
+    function populateAdminDropdown() {
+        const select = document.getElementById("adminTimeSelect");
+        select.innerHTML = "";
+        drawData.forEach((row, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `${row.time} - ${row.name}`;
+            select.appendChild(option);
+        });
+    }
+
+    // Admin Panel kholne ke liye PIN check
+    function openAdminPanel() {
+        const enteredPin = prompt("Owner Admin PIN daalein (Default: 1234):");
+        if (enteredPin === ADMIN_PIN) {
+            document.getElementById("adminPanel").style.display = "block";
+            populateAdminDropdown();
+        } else if (enteredPin !== null) {
+            alert("Galat PIN! Access Denied.");
+        }
+    }
+
+    function closeAdminPanel() {
+        document.getElementById("adminPanel").style.display = "none";
+    }
+
+    // 1. Manual Number Set karne ka logic
+    function setManualNumber() {
+        const index = document.getElementById("adminTimeSelect").value;
+        let num = document.getElementById("adminNumberInput").value.trim();
+
+        // Validation: Sirf 00 se 99 tak number allow karein
+        if (!/^\d{1,2}$/.test(num)) {
+            alert("Kripya 00 se 99 ke beech sahi number daalein!");
+            return;
+        }
+
+        // Single digit ko 2-digit banayein (e.g., 5 -> 05)
+        if (num.length === 1) {
+            num = "0" + num;
+        }
+
+        drawData[index].result = num;
+        saveAndRefresh();
+        document.getElementById("adminNumberInput").value = "";
+        alert(`${drawData[index].time} ka result '${num}' set ho gaya hai!`);
+    }
+
+    // Random 00-99 generator function
+    function getRandomTwoDigit() {
+        const rand = Math.floor(Math.random() * 100);
+        return rand < 10 ? "0" + rand : String(rand);
+    }
+
+    // 2. Sabhi slots mein Auto Random number bharna
+    function generateAllRandom() {
+        if (confirm("Kya aap sabhi slots ke liye naye Random numbers generate karna chahte hain?")) {
+            drawData.forEach(row => {
+                row.result = getRandomTwoDigit();
+            });
+            saveAndRefresh();
+        }
+    }
+
+    // 3. Agle khali slot mein ek random number nikalna
+    function generateNextSlot() {
+        const emptySlot = drawData.find(row => row.result === "" || row.result === "--");
+        if (emptySlot) {
+            emptySlot.result = getRandomTwoDigit();
+            saveAndRefresh();
+            alert(`${emptySlot.time} ka result '${emptySlot.result}' aaya hai!`);
+        } else {
+            alert("Sabhi time slots ke result pehle hi aa chuke hain!");
+        }
+    }
+
+    // 4. Sabhi results ko reset/clear karna (Naye din ke liye)
+    function clearAllResults() {
+        if (confirm("Kya aap sabhi numbers ko khali (reset) karna chahte hain?")) {
+            drawData.forEach(row => {
+                row.result = "--";
+            });
+            saveAndRefresh();
+        }
+    }
+
+    // Data save aur table update
+    function saveAndRefresh() {
+        localStorage.setItem("rajaraniResults", JSON.stringify(drawData));
+        renderTable();
+    }
+
+    function filterResults() {
+        const selectedDate = document.getElementById("dateInput").value;
+        alert("Date: " + selectedDate + " ke results dikhaye ja rahe hain.");
+        renderTable();
+    }
+
+    function menuClick(option) {
+        if (option === 'Exit') {
+            closeAdminPanel();
+        } else {
+            alert(option + " section selected!");
+        }
+    }
+
+    window.onload = () => {
+        renderTable();
+    };
+</script>
+
+</body>
+</html>
